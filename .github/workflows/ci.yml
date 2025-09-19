@@ -8,12 +8,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
-    # Set permissions for GitHub Pages deployment
     permissions:
       contents: read
-      pages: write
-      id-token: write
       pull-requests: write
 
     steps:
@@ -21,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 3. Set up JDK 19 with enhanced caching
+      # 2. Set up JDK 19 with enhanced caching
       - name: Set up JDK 19
         uses: actions/setup-java@v4
         with:
@@ -30,7 +26,7 @@ jobs:
           cache: maven
           cache-dependency-path: '**/pom.xml'
 
-      # 4. Cache Maven dependencies for faster builds
+      # 3. Cache Maven dependencies for faster builds
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -38,14 +34,13 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      # 5. Setup Chrome for headless testing (commented for API-only tests)
-      # Uncomment when Selenium tests are ready
+      # 4. Setup Chrome for headless testing
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: stable
 
-      # 6. Install Allure CLI
+      # 5. Install Allure CLI
       - name: Install Allure CLI
         run: |
           echo "Installing Allure CLI..."
@@ -55,7 +50,7 @@ jobs:
           echo "Allure version:"
           allure --version
 
-      # 7. Validate test environment
+      # 6. Validate test environment
       - name: Validate Environment
         run: |
           echo "Java version:"
@@ -65,20 +60,16 @@ jobs:
           echo "Allure version:"
           allure --version
 
-      # 8. Clean old directories and run tests with better error handling
+      # 7. Clean old directories and run tests
       - name: Clean and run tests
         run: |
           rm -rf target/allure-results target/allure-report || true
           echo "Starting test execution..."
           mvn clean test -Dtest=PortfolioTest
-#        -B -V
         env:
-          # Environment variables for consistent test execution
-          # MAVEN_OPTS: "-Xmx1024m -XX:MaxPermSize=256m"
-          # Uncomment for Selenium tests:
           HEADLESS: true
 
-      # 9. Generate Allure HTML report using CLI
+      # 8. Generate Allure HTML report
       - name: Generate Allure Report
         if: always()
         run: |
@@ -96,6 +87,16 @@ jobs:
             echo "<html><body><h1>No test results found</h1><p>The test execution did not generate Allure results.</p></body></html>" > target/allure-report/index.html
           fi
 
+      # 9. Upload Allure Report for Pages deployment
+      - name: Upload Allure Report for Pages
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-pages
+          path: target/allure-report/
+          retention-days: 1
+
+      # 10. Upload Test Results Summary
       - name: Upload Test Results Summary
         if: always()
         uses: actions/upload-artifact@v4
@@ -104,38 +105,49 @@ jobs:
           path: |
             target/surefire-reports/
             target/allure-results/
-            target/allure-report/
           retention-days: 7
 
-      # 10. Upload Allure Report
-      - name: Upload Allure Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-report-${{ github.run_number }}
-          path: target/allure-report/
-          retention-days: 14
+  # Separate job for GitHub Pages deployment
+  deploy-pages:
+    needs: test
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
 
-      # 11. FIXED: Setup GitHub Pages properly
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # 1. Download the Allure report
+      - name: Download Allure Report
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-report-pages
+          path: ./allure-report
+
+      # 2. Setup GitHub Pages
       - name: Setup Pages
-        if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         uses: actions/configure-pages@v4
 
-      # 12. FIXED: Upload to Pages (new method)
+      # 3. Upload to GitHub Pages
       - name: Upload Pages Artifact
-        if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         uses: actions/upload-pages-artifact@v3
         with:
-          path: target/allure-report/
+          path: ./allure-report
 
-      # 13. FIXED: Deploy to GitHub Pages (new method)
+      # 4. Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
-        if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         id: deployment
         uses: actions/deploy-pages@v4
 
+      # 5. Comment with Pages URL
       - name: Comment with Pages URL
-        if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && steps.deployment.outputs.page_url
+        if: steps.deployment.outputs.page_url
         uses: actions/github-script@v7
         with:
           script: |
@@ -147,16 +159,3 @@ jobs:
               commit_sha: context.sha,
               body: `🚀 **Allure Report Deployed**\n\n📊 View the report at: ${deploymentUrl}`
             });
-
-      - name: Debug Information
-        if: always()
-        run: |
-          echo "=== Debug Information ==="
-          echo "Repository: ${{ github.repository }}"
-          echo "Branch: ${{ github.ref }}"
-          echo "Event: ${{ github.event_name }}"
-          echo "Working directory:"
-          pwd
-          echo "Directory structure:"
-          find . -name "target" -type d -exec ls -la {} \; || true
-          echo "=========================="
