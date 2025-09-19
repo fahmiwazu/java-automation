@@ -145,17 +145,9 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      # 5. Comment with Pages URL
-      - name: Comment with Pages URL
+      # 5. Print deployment URL (instead of commenting)
+      - name: Print deployment URL
         if: steps.deployment.outputs.page_url
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const deploymentUrl = '${{ steps.deployment.outputs.page_url }}';
-            
-            github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: `🚀 **Allure Report Deployed**\n\n📊 View the report at: ${deploymentUrl}`
-            });
+        run: |
+          echo "🚀 Allure Report deployed successfully!"
+          echo "📊 View the report at: ${{ steps.deployment.outputs.page_url }}"
