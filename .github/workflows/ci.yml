@@ -46,11 +46,14 @@ jobs:
           chrome-version: stable
 
       # 6. Install Allure CLI
-      - name: Setup Allure
-        uses: simple-elf/allure-report-action@v1.7
-        with:
-          allure_version: '2.30.0'  # Updated to latest stable version
-          gh_pages: false
+      - name: Install Allure CLI
+        run: |
+          echo "Installing Allure CLI..."
+          curl -o allure-2.30.0.tgz -Ls https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.30.0/allure-commandline-2.30.0.tgz
+          sudo tar -zxvf allure-2.30.0.tgz -C /opt/
+          sudo ln -s /opt/allure-2.30.0/bin/allure /usr/bin/allure
+          echo "Allure version:"
+          allure --version
 
       # 7. Validate test environment
       - name: Validate Environment
