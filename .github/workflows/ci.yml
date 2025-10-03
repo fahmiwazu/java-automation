@@ -65,7 +65,7 @@ jobs:
         run: |
           rm -rf target/allure-results target/allure-report || true
           echo "Starting test execution..."
-          mvn clean test -Dtest=PortfolioTest
+          mvn clean test -Dtest=**/ci/*Test
         env:
           HEADLESS: true
 

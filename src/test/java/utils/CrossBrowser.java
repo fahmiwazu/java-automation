@@ -80,7 +80,7 @@ public class CrossBrowser {
         FirefoxOptions options = new FirefoxOptions();
 
         // Uncomment the line below to run in headless mode
-        // options.addArguments("--headless");
+        //options.addArguments("--headless");
         options.addArguments("--width=1920");
         options.addArguments("--height=1080");
         options.addPreference("dom.webnotifications.enabled", false);
