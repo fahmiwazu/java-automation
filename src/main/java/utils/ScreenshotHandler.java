@@ -20,7 +20,6 @@ import java.util.logging.Level;
  * @param testClassName Getters
  */
 public record ScreenshotHandler(WebDriver driver, String testClassName) {
-    private static WebDriverWait wait;
     private static final Logger logger = Logger.getLogger(ScreenshotHandler.class.getName());
     private static final String BASE_SCREENSHOT_DIR = "evidence/screenshot";
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
@@ -31,7 +30,6 @@ public record ScreenshotHandler(WebDriver driver, String testClassName) {
 
     public ScreenshotHandler(WebDriver driver, String testClassName) {
         this.driver = validateDriver(driver);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         this.testClassName = testClassName;
         createScreenshotDirectory();
     }
@@ -172,6 +170,8 @@ public record ScreenshotHandler(WebDriver driver, String testClassName) {
 
     public void attachHighlightScreenshotToAllure(By locator, String fileName) {
         try {
+            // Create thread-local WebDriverWait instance
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
 
             // Store original style
@@ -182,7 +182,20 @@ public record ScreenshotHandler(WebDriver driver, String testClassName) {
                     "arguments[0].style.border='3px solid red'", element);
 
             // Take screenshot
-            attachScreenshotToAllure(fileName);
+            try {
+                if (isDriverClosed()) {
+                    logger.warning("Cannot attach screenshot to Allure: WebDriver is closed");
+                    return;
+                }
+
+                byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+                Allure.getLifecycle().addAttachment(fileName, "image/png", "png", screenshot);
+                logger.info("Screenshot attached to Allure report: " + fileName);
+
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Failed to attach screenshot to Allure report", e);
+                // Don't throw exception here as this is supplementary functionality
+            }
 
             // Restore original style
             ((JavascriptExecutor) driver).executeScript(
@@ -196,6 +209,8 @@ public record ScreenshotHandler(WebDriver driver, String testClassName) {
 
     public void takeHighlightedElementScreenshot(By locator, String fileName) {
         try {
+            // Create thread-local WebDriverWait instance
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
 
             // Store original style

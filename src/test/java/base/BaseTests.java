@@ -10,15 +10,18 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.EventFiringDecorator;
 import org.openqa.selenium.support.events.WebDriverListener;
 
+import pages.SimpleCRUDPage;
 import utils.CrossBrowser;
 import utils.EventReporter;
 import utils.ScreenshotHandler;
+import utils.ValidationUtils;
 
 @ExtendWith(ScreenshotTestWatcher.class)
 public class BaseTests implements WebDriverListener {
     protected static WebDriver driver;
     protected static utils.ScreenshotHandler screenshot;
-
+    protected static SimpleCRUDPage simpleCRUDPage;
+    protected static ValidationUtils validator;
 
     @BeforeAll
     static void setupClass() {
@@ -32,8 +35,6 @@ public class BaseTests implements WebDriverListener {
         // Wrap driver with event firing decorator and custom listener
         EventReporter listener = new EventReporter();
         driver = new EventFiringDecorator(listener).decorate(baseDriver);
-        driver.manage().window().maximize();
-        screenshot = new ScreenshotHandler(driver);
 
         // Initialize Page Objects
         initializePageObjects();
@@ -47,7 +48,8 @@ public class BaseTests implements WebDriverListener {
      */
     private static void initializePageObjects() {
         // Initialize IMS pages
-
+        screenshot = new ScreenshotHandler(driver);
+        simpleCRUDPage = new SimpleCRUDPage(driver);
     }
 
     /**

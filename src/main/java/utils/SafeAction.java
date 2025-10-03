@@ -302,9 +302,9 @@ public class SafeAction {
             WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
             highlightElement(element); // Highlight before input
 
-            // element.clear();
-            element.sendKeys(Keys.CONTROL+"a");
-            element.sendKeys(Keys.DELETE);
+            element.clear();
+            // element.sendKeys(Keys.CONTROL+"a");
+            // element.sendKeys(Keys.DELETE);
 
             element.sendKeys(text);
             // waitForElementToHaveValue(locator, text);

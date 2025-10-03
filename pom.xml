@@ -179,7 +179,15 @@
             <artifactId>allure-selenide</artifactId>
             <version>2.29.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.appium</groupId>
+            <artifactId>java-client</artifactId>
+            <version>10.0.0</version>
+        </dependency>
+
     </dependencies>
+
 
     <build>
         <plugins>
@@ -206,13 +214,36 @@
                     </includes>
                     <!-- Parallel Execution Capability -->
                     <parallel>classes</parallel>
-                    <threadCount>2</threadCount> <!-- Reduced for CI stability -->
+                    <threadCount>2</threadCount>
                     <perCoreThreadCount>false</perCoreThreadCount>
                     <useUnlimitedThreads>false</useUnlimitedThreads>
+
+                    <!-- FIX: Prevent corrupted channel warnings -->
+                    <forkCount>1</forkCount>
+                    <reuseForks>true</reuseForks>
+
+                    <!-- Redirect stdout/stderr to prevent corruption -->
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+
+                    <!-- Use TCP/IP communication instead of native streams -->
+                    <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
+
                     <!-- Allure Results Directory -->
                     <systemPropertyVariables>
                         <allure.results.directory>${allure.results.directory}</allure.results.directory>
+                        <!-- Suppress WebDriverManager logs -->
+                        <wdm.targetPath>${project.basedir}/target/webdriver</wdm.targetPath>
+                        <wdm.cachePath>${project.basedir}/target/webdriver-cache</wdm.cachePath>
+                        <!-- Selenium logging -->
+                        <webdriver.chrome.silentOutput>true</webdriver.chrome.silentOutput>
+                        <webdriver.edge.silentOutput>true</webdriver.edge.silentOutput>
                     </systemPropertyVariables>
+
+                    <!-- Additional args to prevent issues -->
+                    <argLine>
+                        -Xmx1024m
+                        -Djava.awt.headless=true
+                    </argLine>
                 </configuration>
             </plugin>
         </plugins>
