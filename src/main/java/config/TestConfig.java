@@ -7,4 +7,6 @@ public class TestConfig {
     public static final String BASE_URL_LOC = ConfigLoader.get("BASE_URL_LOC");
     public static final String BASE_URL_STG = ConfigLoader.get("BASE_URL_STG");
     public static final String BASE_URL_PRD = ConfigLoader.get("BASE_URL_PRD");
+    public static final String BASE_URL_SIMPLE_CRUD_DEV = ConfigLoader.get("BASE_URL_SIMPLE_CRUD_DEV");
+    public static final String BASE_URL_SIMPLE_CRUD_PROD = ConfigLoader.get("BASE_URL_SIMPLE_CRUD_PROD");
 }

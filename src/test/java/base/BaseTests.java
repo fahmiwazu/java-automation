@@ -34,7 +34,7 @@ public class BaseTests implements WebDriverListener {
 
         // Wrap driver with event firing decorator and custom listener
         EventReporter listener = new EventReporter();
-        driver = new EventFiringDecorator(listener).decorate(baseDriver);
+        driver = new EventFiringDecorator<>(listener).decorate(baseDriver);
 
         // Initialize Page Objects
         initializePageObjects();

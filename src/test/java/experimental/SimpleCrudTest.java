@@ -1,6 +1,5 @@
 package experimental;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 import base.BaseTests;
 import config.TestConfig;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.openqa.selenium.*;
-import pages.SimpleCRUDPage;
 import utils.ScreenshotHandler;
 import utils.ValidationUtils;
 
@@ -28,8 +26,8 @@ public class SimpleCrudTest extends BaseTests {
 //        driver.manage().window().maximize();
         screenshot = new ScreenshotHandler(driver, this.getClass().getSimpleName());
         validator = new ValidationUtils(driver, this.getClass().getSimpleName());
-        baseUrl = "https://simple-crud-apps.vercel.app/";
-        // baseUrl = "http://localhost:3000/";
+        // baseUrl = TestConfig.BASE_URL_SIMPLE_CRUD_DEV;
+        baseUrl = TestConfig.BASE_URL_SIMPLE_CRUD_PROD;
     }
 
     @BeforeEach
@@ -38,7 +36,7 @@ public class SimpleCrudTest extends BaseTests {
     }
 
     @ParameterizedTest
-    @CsvFileSource(files = {"src/test/resources/test-data/list_of_product.csv"}, numLinesToSkip = 1)
+    @CsvFileSource(files = {"src/test/resources/test-data/single_product.csv"}, numLinesToSkip = 1)
     public void testSimpleCrud(String productName,
                                String productPrice,
                                String productQuantity,

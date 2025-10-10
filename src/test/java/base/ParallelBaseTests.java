@@ -38,7 +38,7 @@ public class ParallelBaseTests implements WebDriverListener {
 
         // Wrap driver with event firing decorator and custom listener
         EventReporter listener = new EventReporter();
-        WebDriver decoratedDriver = new EventFiringDecorator(listener).decorate(baseDriver);
+        WebDriver decoratedDriver = new EventFiringDecorator<>(listener).decorate(baseDriver);
 
         // Store in ThreadLocal
         driver.set(decoratedDriver);

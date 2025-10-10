@@ -20,21 +20,22 @@ import java.util.Objects;
 
 @Execution(ExecutionMode.CONCURRENT) // Enable parallel execution at class level
 @Epic("Simple CRUD Apps")
-@Feature("CRUD Operation")
+//@Feature("CRUD Operation")
 public class ParallelSimpleCrudTest extends ParallelBaseTests {
     private String baseUrl;
 
     @BeforeEach
     public void testSetup() {
-        getDriver().manage().window().setSize(new Dimension(1920, 1080));
-        baseUrl = "https://simple-crud-apps.vercel.app/";
-        // baseUrl = "http://localhost:3000/";
+
+        baseUrl = TestConfig.BASE_URL_SIMPLE_CRUD_PROD;
+        // baseUrl = TestConfig.BASE_URL_SIMPLE_CRUD_DEV;
 
         getValidator().clearValidationErrors();
     }
 
     @ParameterizedTest(name="Product : {0}")
     @DisplayName("Product Management - Simple CRUD")
+    @Feature("Desktop View")
     @Story("CRUD Regression")
     @Tag("Integration_Test")
     @Tag("E2E")
@@ -44,14 +45,16 @@ public class ParallelSimpleCrudTest extends ParallelBaseTests {
     @Link(name="Live Apps", url="https://simple-crud-apps.vercel.app/")
     @CsvFileSource(files = {"src/test/resources/test-data/list_of_product.csv"}, numLinesToSkip = 1)
     @Execution(ExecutionMode.CONCURRENT) // Enable parallel execution at method level
-    public void testSimpleCrud(String productName,
+    public void testSimpleCrudDesktop(String productName,
                                String productPrice,
                                String productQuantity,
                                String updatedName,
                                String updatedPrice,
                                String updatedQuantity) {
 
-        allureDescription();
+        getDriver().manage().window().setSize(new Dimension(1920, 1080));
+
+        allureDescriptionDesktop();
 
         SimpleCRUDPage page = getSimpleCRUDPage();
         ScreenshotHandler screenshot = getScreenshot();
@@ -142,77 +145,164 @@ public class ParallelSimpleCrudTest extends ParallelBaseTests {
         });
     }
 
-    private void allureDescription(){
+
+    @ParameterizedTest(name="Product : {0}")
+    @DisplayName("Product Management - Simple CRUD")
+    @Feature("Mobile View")
+    @Story("CRUD Regression")
+    @Tag("Integration_Test")
+    @Tag("E2E")
+    @Tag("Regression_Test")
+    @Owner("Fahmi Wiradika")
+    @Link(name="Repository", url="https://github.com/fahmiwazu/simple-crud-apps")
+    @Link(name="Live Apps", url="https://simple-crud-apps.vercel.app/")
+    @CsvFileSource(files = {"src/test/resources/test-data/list_of_product.csv"}, numLinesToSkip = 1)
+    @Execution(ExecutionMode.CONCURRENT) // Enable parallel execution at method level
+    public void testSimpleCrudMobile(String productName,
+                               String productPrice,
+                               String productQuantity,
+                               String updatedName,
+                               String updatedPrice,
+                               String updatedQuantity) {
+
+        getDriver().manage().window().setSize(new Dimension(428, 926));
+
+        allureDescriptionMobile();
+
+        SimpleCRUDPage page = getSimpleCRUDPage();
+        ScreenshotHandler screenshot = getScreenshot();
+        ValidationUtils validator = getValidator();
+
+        Allure.step("Navigate into apps", () -> {
+            getDriver().get(baseUrl);
+            page.waitLoadProduct();
+            screenshot.attachScreenshotToAllure("Apps Main Page");
+        });
+
+        Allure.step("Add new Product", () -> {
+            page.setProductName(productName);
+            page.setProductPrice(productPrice);
+            page.setProductQuantity(productQuantity);
+            page.clickAddProduct();
+            screenshot.attachScreenshotToAllure("New Product Added");
+        });
+
+        String product = page.extractProductIdFromNotification();
+        page.waitForNotificationToDisappear();
+
+        Allure.step("New Product Assertion", () -> {
+            screenshot.attachHighlightScreenshotToAllure(
+                    By.xpath(page.productItemXpathLocator(product)),
+                    "Evidence"
+            );
+
+            validator.validationCheck("Validate Product Name",
+                    productName,
+                    page.extractProductNameById(product));
+            validator.validationCheck("Validate Product Price",
+                    productPrice,
+                    page.extractProductPriceById(product));
+            validator.validationCheck("Validate Quantity",
+                    productQuantity,
+                    page.extractProductQuantityById(product));
+        });
+
+        Allure.step("Update Product", () -> {
+            page.clickUpdateButtonByProductId(product);
+            page.setUpdateName(updatedName);
+            page.setUpdatePrice(updatedPrice);
+            page.setUpdateQuantity(updatedQuantity);
+            page.clickConfirmUpdate();
+//            screenshot.attachScreenshotToAllure("Updated Product");
+        });
+
+        String updatedProduct = page.extractProductIdFromNotification();
+        page.waitForNotificationToDisappear();
+
+        Allure.step("Update Product Assertion", () -> {
+            screenshot.attachHighlightScreenshotToAllure(
+                    By.xpath(page.productItemXpathLocator(updatedProduct)),
+                    "Evidence"
+            );
+
+            if (!Objects.equals(updatedName, "")) {
+                validator.validationCheck("Validate Product Name",
+                        updatedName,
+                        page.extractProductNameById(product));
+            }
+            if (!Objects.equals(updatedPrice, "")) {
+                validator.validationCheck("Validate Product Price",
+                        updatedPrice,
+                        page.extractProductPriceById(product));
+            }
+            if (!Objects.equals(updatedQuantity, "")) {
+                validator.validationCheck("Validate Quantity",
+                        updatedQuantity,
+                        page.extractProductQuantityById(product));
+            }
+        });
+
+        Allure.step("Deleting Product", () -> {
+            page.clickDeleteButtonByProductId(updatedProduct);
+            page.clickConfirmDelete();
+            screenshot.attachScreenshotToAllure("Deleted Product");
+        });
+
+        String deletedProduct = page.extractProductIdFromNotification();
+        page.waitForNotificationToDisappear();
+
+        Allure.step("Product ID Notification Assertion", () -> {
+            validator.assertEquals(product, updatedProduct, deletedProduct);
+            validator.assertTrue("Verify Deleted Product",
+                    page.isProductDeleted(deletedProduct));
+        });
+    }
+
+    private void allureDescriptionDesktop(){
         Allure.description("""
-        # 🚀 Parallel Simple CRUD Test
-        
+        # 🚀 Parallel Simple CRUD Test — Desktop View
+
         ## 📋 Overview
-        This test class validates **end-to-end CRUD (Create, Read, Update, Delete)** functionality of the [Simple CRUD App](https://simple-crud-apps.vercel.app/) with parallel execution support! ⚡ \s
-        It uses **JUnit 5**, **Selenium WebDriver**, and **Allure Reporting** to ensure reliability, reproducibility, and comprehensive test evidence. 📊
-        
+        Validates end-to-end CRUD on desktop viewport with parallel execution support.
+
         ## 🌍 Environment
-        - **Live App URL:** [https://simple-crud-apps.vercel.app/](https://simple-crud-apps.vercel.app/) 🌐 \s
-        - **Local Dev URL (optional):** `http://localhost:3000/` 💻 \s
-        - **Browser Resolution:** `1920 x 1080` 🖥️ \s
+        - Live App URL: [https://simple-crud-apps.vercel.app/](https://simple-crud-apps.vercel.app/)
+        - Resolution: 1920 x 1080
+        - Parallel: Class and method level
+
+        ## 🔄 Flow
+        1) Initialize browser at 1920x1080
+        2) Navigate to app and wait for products
+        3) Add → Assert → Update → Assert → Delete → Assert
+        4) Attach screenshots and highlights to Allure
+
+        ## 📊 Evidence
+        - Desktop screenshots and validation logs in Allure
         
-        ## ✨ Key Features
-        - **⚡ Parallel Execution** \s
-          - Class and method level parallelization enabled with `@Execution(ExecutionMode.CONCURRENT)`. 🏃‍♂️💨 \s
-          - Multiple CSV test data rows executed in parallel for lightning-fast results! ⚡ \s
+        """
+        );
+    }
 
-        - **📊 Data-Driven Testing** \s
-          - Test inputs are sourced from `list_of_product.csv`. 📁 \s
-          - Each row represents a product scenario (name, price, quantity, updates). 🛒 \s
+    private void allureDescriptionMobile(){
+        Allure.description("""
+        # 🚀 Parallel Simple CRUD Test — Mobile View
 
-        - **📸 Step-Level Reporting with Allure** \s
-          - Screenshots and element highlights attached at every major step. 📷✨ \s
-          - Validation checks logged with clear pass/fail evidence. ✅❌ \s
-          - Custom Allure steps (`@Step`, `Allure.step`) provide a narrative flow. 📖 \s
+        ## 📋 Overview
+        Validates end-to-end CRUD on a mobile-like viewport with parallel execution support.
 
-        ## 🔄 Test Flow
-        1. **🛠️ Setup** \s
-           - Browser initialized with 1920x1080 resolution. 🖥️ \s
-           - Base URL set (local or deployed app). 🌐 \s
-           - Validation errors cleared before each test. 🧹 \s
+        ## 🌍 Environment
+        - Live App URL: [https://simple-crud-apps.vercel.app/](https://simple-crud-apps.vercel.app/)
+        - Resolution: 428 x 926
+        - Parallel: Class and method level
 
-        2. **🎯 Test Steps**
-           - **🚪 Navigate to App** \s
-             - Open CRUD app and wait for product list. 📱 \s
-             - Capture initial screenshot. 📸 \s
+        ## 🔄 Flow
+        1) Initialize browser at 428x926
+        2) Navigate to app and wait for products
+        3) Add → Assert → Update → Assert → Delete → Assert
+        4) Attach screenshots and highlights to Allure
 
-           - **➕ Add Product** \s
-             - Enter product details (name, price, quantity). ✏️ \s
-             - Submit form and verify creation notification. 🔔 \s
-             - Assert product details on UI. ✅ \s
-
-           - **✏️ Update Product** \s
-             - Trigger update form for created product. 🔄 \s
-             - Modify fields (name, price, quantity). 📝 \s
-             - Validate updated product fields. ✔️ \s
-
-           - **🗑️ Delete Product** \s
-             - Delete updated product. 🚮 \s
-             - Verify deletion notification and absence of product in list. 👻 \s
-
-        3. **🏁 Post-Test**
-           - **📊 Validation Summary**: Aggregates and prints all validation results (`@AfterEach`). 📈 \s
-           - **📑 Allure Report Generation**: Automatically triggers report build on Windows (`@AfterAll`). 🎉 \s
-
-        ## 🔍 Evidence
-        - **📸 Screenshots**: \s
-          - Page states (before/after CRUD). 🖼️ \s
-          - Highlighted product elements for assertion. 🎯 \s
-
-        - **📝 Validation Logs**: \s
-          - Field-by-field comparisons between expected and actual values. 🔬 \s
-
-        ## 🎁 Benefits
-        - Ensures reliability of **CRUD operations** in the application. 🛡️ \s
-        - Provides **parallel speedup** for large datasets. 🚄 \s
-        - Generates **comprehensive Allure reports** with visual and textual evidence. 📊✨ \s
-
-        ---
-
+        ## 📊 Evidence
+        - Mobile screenshots and validation logs in Allure
         """
         );
     }

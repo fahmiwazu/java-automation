@@ -97,15 +97,15 @@ jobs:
           retention-days: 1
 
       # 10. Upload Test Results Summary
-      - name: Upload Test Results Summary
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-${{ github.run_number }}
-          path: |
-            target/surefire-reports/
-            target/allure-results/
-          retention-days: 7
+      # - name: Upload Test Results Summary
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: test-results-${{ github.run_number }}
+      #     path: |
+      #       target/surefire-reports/
+      #       target/allure-results/
+      #     retention-days: 7
 
   # Separate job for GitHub Pages deployment
   deploy-pages:
