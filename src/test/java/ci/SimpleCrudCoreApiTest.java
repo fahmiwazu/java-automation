@@ -138,13 +138,13 @@ public class SimpleCrudCoreApiTest extends BaseApiTest {
         Allure.step("Delete Product by ID",()->{
             Response deleteResp = apiService.get().deleteProduct(createdProductId.get());
             deleteResp.then().statusCode(200);
-            createdProductId.remove();
         });
 
         Allure.step("Check Deleted Product by ID",()->{
             apiService.get().getProductById(createdProductId.get())
                     .then().statusCode(200)
                     .body("message",org.hamcrest.Matchers.equalTo("Product not found"));
+            createdProductId.remove();
         });
     }
 
