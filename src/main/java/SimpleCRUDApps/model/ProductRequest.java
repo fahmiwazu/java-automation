@@ -1,4 +1,4 @@
-package model;
+package SimpleCRUDApps.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -15,5 +15,5 @@ public class ProductRequest {
     private String name;
     private Integer quantity;
     private Integer price;
-    private String image;
+//    private String image;
 }

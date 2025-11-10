@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeAll;
 public class BaseApiTest {
 
     protected static RequestSpecification requestSpec;
+    public static String productId;
 
     @BeforeAll
     public static void setupBase() {

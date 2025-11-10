@@ -10,7 +10,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.EventFiringDecorator;
 import org.openqa.selenium.support.events.WebDriverListener;
 
-import pages.SimpleCRUDPage;
+import SimpleCRUDApps.pages.SimpleCRUDPage;
 import utils.CrossBrowser;
 import utils.EventReporter;
 import utils.ScreenshotHandler;

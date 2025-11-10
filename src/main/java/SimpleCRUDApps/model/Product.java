@@ -1,4 +1,4 @@
-package model;
+package SimpleCRUDApps.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

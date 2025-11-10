@@ -10,7 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
-import pages.SimpleCRUDPage;
+import SimpleCRUDApps.pages.SimpleCRUDPage;
 import utils.ScreenshotHandler;
 import utils.ValidationUtils;
 
