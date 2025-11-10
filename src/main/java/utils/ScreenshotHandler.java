@@ -221,7 +221,7 @@ public record ScreenshotHandler(WebDriver driver, String testClassName) {
                     "arguments[0].style.border='3px solid red'", element);
 
             // Take screenshot
-            String filePath = takeFullPageScreenshot(fileName);
+            takeFullPageScreenshot(fileName);
 
             // Restore original style
             ((JavascriptExecutor) driver).executeScript(

@@ -10,7 +10,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.EventFiringDecorator;
 import org.openqa.selenium.support.events.WebDriverListener;
 
-import pages.SimpleCRUDPage;
+import SimpleCRUDApps.pages.SimpleCRUDPage;
 import utils.CrossBrowser;
 import utils.EventReporter;
 import utils.ScreenshotHandler;
@@ -38,7 +38,7 @@ public class ParallelBaseTests implements WebDriverListener {
 
         // Wrap driver with event firing decorator and custom listener
         EventReporter listener = new EventReporter();
-        WebDriver decoratedDriver = new EventFiringDecorator(listener).decorate(baseDriver);
+        WebDriver decoratedDriver = new EventFiringDecorator<>(listener).decorate(baseDriver);
 
         // Store in ThreadLocal
         driver.set(decoratedDriver);

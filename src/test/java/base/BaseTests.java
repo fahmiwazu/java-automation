@@ -10,7 +10,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.EventFiringDecorator;
 import org.openqa.selenium.support.events.WebDriverListener;
 
-import pages.SimpleCRUDPage;
+import SimpleCRUDApps.pages.SimpleCRUDPage;
 import utils.CrossBrowser;
 import utils.EventReporter;
 import utils.ScreenshotHandler;
@@ -34,7 +34,7 @@ public class BaseTests implements WebDriverListener {
 
         // Wrap driver with event firing decorator and custom listener
         EventReporter listener = new EventReporter();
-        driver = new EventFiringDecorator(listener).decorate(baseDriver);
+        driver = new EventFiringDecorator<>(listener).decorate(baseDriver);
 
         // Initialize Page Objects
         initializePageObjects();
